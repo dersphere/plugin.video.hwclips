@@ -68,18 +68,11 @@ def watch_video(id):
 
 
 def __add_folders(entries):
-    items = []
-    for e in entries:
-        title = __translate(e['name'])
-        if int(e['count']):
-            label = '%s (%d)' % (title, int(e['count']))
-        else:
-            label = title
-        items.append({'label': label,
-                      'thumbnail': e.get('image', 'DefaultFolder.png'),
-                      'info': {'plot': e['description']},
-                      'url': plugin.url_for('show_folder', path=e['path']),
-                     })
+    items = [{'label': __get_title(e['name'], int(e['count'])),
+              'thumbnail': e.get('image', 'DefaultFolder.png'),
+              'info': {'plot': e['description']},
+              'url': plugin.url_for('show_folder', path=e['path']),
+             } for e in entries]
     return plugin.add_items(items)
 
 
@@ -94,8 +87,7 @@ def __add_videos(entries):
                        'rating': float(e['rating']),
                        'votes': e['votes'],
                        'views': e['views'],
-                       'overlay': (OVERLAYS['hd'] if e['is_hd']
-                                   else OVERLAYS['none']),
+                       'overlay': __get_overlay(e['is_hd']),
                        'duration': e['duration']},
               'url': plugin.url_for('watch_video',
                                     id=e['id']),
@@ -107,12 +99,21 @@ def __add_videos(entries):
     return plugin.add_items(items, sort_method_ids=sort_methods)
 
 
-def __translate(name):
-    string_id = STRINGS.get(name)
-    if string_id:
-        return plugin.get_string(string_id)
+def __get_overlay(is_hd):
+    if is_hd:
+        overlay = OVERLAYS['hd']
     else:
-        return name
+        overlay = OVERLAYS['none']
+    return overlay
+
+
+def __get_title(title, count=0):
+    string_id = STRINGS.get(title)
+    if string_id:
+        title = plugin.get_string(string_id)
+    if count:
+        title = '%s (%d)' % (title, count)
+    return title
 
 
 def log(msg):
