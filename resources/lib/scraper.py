@@ -8,6 +8,9 @@ USER_AGENT = 'XBMC Addon: plugin.video.hwclips'
 
 DEBUG = True
 
+API_RESPONSE_TYPE_FOLDERS = u'folders'
+API_RESPONSE_TYPE_VIDEOS = u'videos'
+
 
 def get_root():
     log('get_root started')
@@ -22,10 +25,12 @@ def get_root():
 def get_folder(path):
     log('get_folder started with path: %s' % path)
     type, items = __api_request(path)
-    if type == 'folders':
+    if type == API_RESPONSE_TYPE_FOLDERS:
         entries = __format_folders(items)
-    elif type == 'videos':
+    elif type == API_RESPONSE_TYPE_VIDEOS:
         entries = __format_videos(items)
+    else:
+        raise
     log('get_folder finished with %d entries' % len(entries))
     return type, entries
 

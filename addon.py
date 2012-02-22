@@ -1,4 +1,4 @@
-from xbmcswift import Plugin, xbmc, xbmcplugin
+from xbmcswift import Plugin, xbmc, xbmcplugin, xbmcgui
 import resources.lib.scraper as scraper
 
 __ADDON_NAME__ = 'HWCLIPS.com'
@@ -10,6 +10,12 @@ STRINGS = {'videos': 30000,
            'mostRecent': 30010,
            'topRated': 30011,
            'mostViewed': 30012}
+
+OVERLAYS = {'none': xbmcgui.ICON_OVERLAY_NONE,
+            'hd': xbmcgui.ICON_OVERLAY_HD}
+
+SORT_METHODS = {'date': xbmcplugin.SORT_METHOD_DATE,
+                'label': xbmcplugin.SORT_METHOD_LABEL}
 
 
 class Plugin_adv(Plugin):
@@ -49,10 +55,12 @@ def show_root():
 def show_folder(folder):
     log('show_folder started with folder: %s' % folder)
     type, entries = scraper.get_folder(folder)
-    if type == 'folders':
+    if type == scraper.API_RESPONSE_TYPE_FOLDERS:
         return __add_folders(entries)
-    elif type == 'videos':
+    elif type == scraper.API_RESPONSE_TYPE_VIDEOS:
         return __add_videos(entries)
+    else:
+        raise
 
 
 @plugin.route('/video/<id>/')
@@ -82,14 +90,15 @@ def __add_videos(entries):
                        'rating': float(e['rating']),
                        'votes': e['votes'],
                        'views': e['views'],
-                       'overlay': 8 if e['is_hd'] else 0,
+                       'overlay': (OVERLAYS['hd'] if e['is_hd']
+                                   else OVERLAYS['none']),
                        'duration': e['duration']},
               'url': plugin.url_for('watch_video',
                                     id=e['id']),
               'is_folder': False,
               'is_playable': True,
              } for e in entries]
-    return plugin.add_items(items, sort_method_ids=(3, 8, 1))
+    return plugin.add_items(items, sort_method_ids=SORT_METHODS.values())
 
 
 def __translate(name):
