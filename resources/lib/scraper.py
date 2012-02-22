@@ -68,11 +68,23 @@ def __format_videos(items):
              'date': __format_date(i['addtime']),
              'description': i.get('description', ''),
              'gurl': i.get('gurl', ''),
+             'views': i.get('views', '0'),
+             'votes': i.get('ratingCount', '0'),
+             'rating': i.get('averageRating', '0.0'),
+             'is_hd': i.get('isHD', False),
+             'duration': __format_duration(i.get('duration', '0.0')),
             } for i in items]
 
 
 def __format_date(timestamp):
     return datetime.fromtimestamp(int(timestamp)).strftime('%d.%m.%Y')
+
+
+def __format_duration(duration):
+    seconds = int(float(duration))
+    minutes = seconds // 60
+    seconds %= 60
+    return '%02i:%02i' % (minutes, seconds)
 
 
 def log(msg):

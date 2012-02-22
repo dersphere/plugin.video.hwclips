@@ -78,13 +78,18 @@ def __add_videos(entries):
                        'credits': e['username'],
                        'date': e['date'],
                        'genre': ', '.join(e['keywords']),
-                       'plot': e['description']},
+                       'plot': e['description'],
+                       'rating': float(e['rating']),
+                       'votes': e['votes'],
+                       'views': e['views'],
+                       'overlay': 8 if e['is_hd'] else 0,
+                       'duration': e['duration']},
               'url': plugin.url_for('watch_video',
                                     id=e['id']),
               'is_folder': False,
               'is_playable': True,
              } for e in entries]
-    return plugin.add_items(items, sort_method_ids=(3, 1))
+    return plugin.add_items(items, sort_method_ids=(3, 8, 1))
 
 
 def __translate(name):
