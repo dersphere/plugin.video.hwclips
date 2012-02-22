@@ -1,5 +1,6 @@
 from xbmcswift import Plugin, xbmc, xbmcplugin, xbmcgui
 import resources.lib.scraper as scraper
+import resources.lib.cache
 
 __ADDON_NAME__ = 'HWCLIPS.com'
 __ADDON_ID__ = 'plugin.video.hwclips'
@@ -50,7 +51,13 @@ def show_root():
 @plugin.route('/<path>/')
 def show_folder(path):
     log('show_folder started with path: %s' % path)
-    type, data = scraper.get_list(path)
+    cache_path = xbmc.translatePath(plugin._plugin.getAddonInfo('profile'))
+    Cache = resources.lib.cache.Cache(cache_path)
+    cache_data = Cache.get(path, max_age=3600)
+    if not cache_data:
+        cache_data = scraper.get_list(path)
+        Cache.set(path, cache_data)
+    type, data = cache_data
     if type == scraper.API_RESPONSE_TYPE_FOLDERS:
         return __add_folders(data)
     elif type == scraper.API_RESPONSE_TYPE_VIDEOS:
