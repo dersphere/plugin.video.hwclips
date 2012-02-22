@@ -14,9 +14,6 @@ STRINGS = {'videos': 30000,
 OVERLAYS = {'none': xbmcgui.ICON_OVERLAY_NONE,
             'hd': xbmcgui.ICON_OVERLAY_HD}
 
-SORT_METHODS = {'date': xbmcplugin.SORT_METHOD_DATE,
-                'label': xbmcplugin.SORT_METHOD_LABEL}
-
 
 class Plugin_adv(Plugin):
 
@@ -105,7 +102,9 @@ def __add_videos(entries):
               'is_folder': False,
               'is_playable': True,
              } for e in entries]
-    return plugin.add_items(items, sort_method_ids=SORT_METHODS.values())
+    sort_methods = [xbmcplugin.SORT_METHOD_DATE,
+                    xbmcplugin.SORT_METHOD_LABEL]
+    return plugin.add_items(items, sort_method_ids=sort_methods)
 
 
 def __translate(name):
@@ -113,12 +112,11 @@ def __translate(name):
     if string_id:
         return plugin.get_string(string_id)
     else:
-        log('No translation for string: %s' % name)
         return name
 
 
 def log(msg):
-    xbmc.log('%s addon: %s' % (__ADDON_NAME__, msg))
+    xbmc.log(u'%s addon: %s' % (__ADDON_NAME__, msg))
 
 
 if __name__ == '__main__':
