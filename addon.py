@@ -62,7 +62,7 @@ def watch_video(id):
 
 
 def __add_folders(entries):
-    items = [{'label': e['name'],
+    items = [{'label': '%s (%d)' % (e['name'], int(e['count'])),
               'thumbnail': e.get('image', 'DefaultFolder.png'),
               'info': {'plot': e['description']},
               'url': plugin.url_for('show_folder',

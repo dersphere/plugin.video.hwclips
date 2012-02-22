@@ -55,6 +55,7 @@ def __format_folders(items):
              'website': i.get('www', ''),
              'gurl': i.get('gurl', ''),
              'path': i['apiPath'],
+             'count': i.get('videoCount', '0'),
             } for i in items]
 
 
