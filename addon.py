@@ -43,30 +43,31 @@ plugin = Plugin_adv(__ADDON_NAME__, __ADDON_ID__, __file__)
 @plugin.route('/', default=True)
 def show_root():
     log('show_root started')
-    entries = scraper.get_root()
-    items = [{'label': __translate(e['name']),
-              'url': plugin.url_for('show_folder',
-                                    folder=e['path']),
-             } for e in entries]
-    return plugin.add_items(items)
-
-
-@plugin.route('/<folder>/')
-def show_folder(folder):
-    log('show_folder started with folder: %s' % folder)
-    type, entries = scraper.get_folder(folder)
+    type, data = scraper.get_list()
     if type == scraper.API_RESPONSE_TYPE_FOLDERS:
-        return __add_folders(entries)
+        return __add_folders(data)
+    else:
+        raise
+
+
+@plugin.route('/<path>/')
+def show_folder(path):
+    log('show_folder started with path: %s' % path)
+    type, data = scraper.get_list(path)
+    if type == scraper.API_RESPONSE_TYPE_FOLDERS:
+        return __add_folders(data)
     elif type == scraper.API_RESPONSE_TYPE_VIDEOS:
-        return __add_videos(entries)
+        return __add_videos(data)
     else:
         raise
 
 
 @plugin.route('/video/<id>/')
 def watch_video(id):
-    video_url = ''  # fixme
-    return plugin.set_resolved_url(video_url)
+    log('watch_video started with id: %s' % id)
+    video = scraper.get_video(id)
+    log('watch_video finished with video: %s' % video)
+    return plugin.set_resolved_url(video['full_path'])
 
 
 def __add_folders(entries):
@@ -74,7 +75,7 @@ def __add_folders(entries):
               'thumbnail': e.get('image', 'DefaultFolder.png'),
               'info': {'plot': e['description']},
               'url': plugin.url_for('show_folder',
-                                    folder=e['path']),
+                                    path=e['path']),
              } for e in entries]
     return plugin.add_items(items)
 

@@ -10,20 +10,14 @@ DEBUG = True
 
 API_RESPONSE_TYPE_FOLDERS = u'folders'
 API_RESPONSE_TYPE_VIDEOS = u'videos'
+API_RESPONSE_TYPE_VIDEO = u'videoDetail'
+API_RESPONSE_TYPE_ERROR = u'error'
 
 
-def get_root():
-    log('get_root started')
-    type, items = __api_request('root')
-    entries = [{'name': i['name'],
-                'path': i['apiPath'],
-               } for i in items]
-    log('get_root finished with %d entries' % len(entries))
-    return entries
-
-
-def get_folder(path):
-    log('get_folder started with path: %s' % path)
+def get_list(path=None):
+    if not path:
+        path = 'root'
+    log('get_list started with path: %s' % path)
     type, items = __api_request(path)
     if type == API_RESPONSE_TYPE_FOLDERS:
         entries = __format_folders(items)
@@ -31,8 +25,22 @@ def get_folder(path):
         entries = __format_videos(items)
     else:
         raise
-    log('get_folder finished with %d entries' % len(entries))
+    log('get_list finished with %d entries' % len(entries))
     return type, entries
+
+
+def get_video(video_id):
+    log('get_list started with video_id: %s' % video_id)
+    path = 'video/%d' % int(video_id)
+    type, items = __api_request(path)
+    if type == API_RESPONSE_TYPE_VIDEO:
+        entry = __format_video(items)
+    elif type == API_RESPONSE_TYPE_ERROR:
+        raise
+    else:
+        raise
+    log('get_list finished')
+    return entry
 
 
 def __api_request(path):
@@ -45,11 +53,15 @@ def __api_request(path):
     log('__api_request got response with %d bytes' % len(response))
     json = simplejson.loads(response)
     type = json.keys()[0]
-    items = json[type]
-    if DEBUG and items:
-        log('DEBUG: %s' % simplejson.dumps(items[0], indent=1))
+    data = json[type]
+    if DEBUG:
+        log('DEBUG: type: %s' % type)
+        if isinstance(data, list):
+            log('DEBUG: list: %s' % simplejson.dumps(data[0], indent=1))
+        else:
+            log('DEBUG: item: %s' % simplejson.dumps(data, indent=1))
     log('__api_request finished with type: %s' % type)
-    return type, items
+    return type, data
 
 
 def __format_folders(items):
@@ -79,6 +91,10 @@ def __format_videos(items):
              'is_hd': i.get('isHD', False),
              'duration': __format_duration(i.get('duration', '0.0')),
             } for i in items]
+
+
+def __format_video(item):
+    return {'full_path': item['filePath']}
 
 
 def __format_date(timestamp):
