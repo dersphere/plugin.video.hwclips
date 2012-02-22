@@ -18,11 +18,11 @@ def get_list(path=None):
     if not path:
         path = 'root'
     log('get_list started with path: %s' % path)
-    type, items = __api_request(path)
+    type, data = __api_request(path)
     if type == API_RESPONSE_TYPE_FOLDERS:
-        entries = __format_folders(items)
+        entries = __format_folders(data)
     elif type == API_RESPONSE_TYPE_VIDEOS:
-        entries = __format_videos(items)
+        entries = __format_videos(data)
     else:
         raise
     log('get_list finished with %d entries' % len(entries))
@@ -32,9 +32,9 @@ def get_list(path=None):
 def get_video(video_id):
     log('get_list started with video_id: %s' % video_id)
     path = 'video/%d' % int(video_id)
-    type, items = __api_request(path)
+    type, data = __api_request(path)
     if type == API_RESPONSE_TYPE_VIDEO:
-        entry = __format_video(items)
+        entry = __format_video(data)
     elif type == API_RESPONSE_TYPE_ERROR:
         raise
     else:
