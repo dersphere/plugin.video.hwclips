@@ -13,14 +13,19 @@ API_RESPONSE_TYPE_VIDEOS = u'videos'
 API_RESPONSE_TYPE_VIDEO = u'videoDetail'
 API_RESPONSE_TYPE_ERROR = u'error'
 
+LANG_SUFFIX = {'de': '',
+               'en': '_en'}
 
-def get_list(path=None):
+
+def get_list(path=None, pref_lang=None):
     if not path:
         path = 'root'
-    log('get_list started with path: %s' % path)
+    if not pref_lang:
+        pref_lang = 'en'
+    log('get_list started with path: %s pref_lang: %s' % (path, pref_lang))
     type, data = __api_request(path)
     if type == API_RESPONSE_TYPE_FOLDERS:
-        entries = __format_folders(data)
+        entries = __format_folders(data, pref_lang)
     elif type == API_RESPONSE_TYPE_VIDEOS:
         entries = __format_videos(data)
     else:
@@ -64,10 +69,11 @@ def __api_request(path):
     return type, data
 
 
-def __format_folders(items):
-    return [{'name': i['name'],
+def __format_folders(items, pref_lang):
+    return [{'name': i.get('name' + LANG_SUFFIX[pref_lang], i['name']),
              'id': i.get('ID', ''),
-             'description': i.get('description', ''),
+             'description': i.get('description' + LANG_SUFFIX[pref_lang],
+                                  i.get('description', '')),
              'image': i.get('logo', ''),
              'website': i.get('www', ''),
              'gurl': i.get('gurl', ''),
@@ -90,6 +96,7 @@ def __format_videos(items):
              'rating': i.get('averageRating', '0.0'),
              'is_hd': i.get('isHD', False),
              'duration': __format_duration(i.get('duration', '0.0')),
+             'language': i.get('language', ''),
             } for i in items]
 
 
