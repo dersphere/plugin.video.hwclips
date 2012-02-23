@@ -87,7 +87,7 @@ def __add_videos(entries):
     items = [{'label': e['name'],
               'thumbnail': e.get('image', 'DefaultVideo.png'),
               'info': {'originaltitle': e['name'],
-                       'credits': e['username'],
+                       'studio': e['username'],
                        'date': e['date'],
                        'genre': ', '.join(e['keywords']),
                        'plot': e['description'],
@@ -102,7 +102,9 @@ def __add_videos(entries):
               'is_playable': True,
              } for e in entries]
     sort_methods = [xbmcplugin.SORT_METHOD_DATE,
-                    xbmcplugin.SORT_METHOD_LABEL]
+                    xbmcplugin.SORT_METHOD_LABEL,
+                    xbmcplugin.SORT_METHOD_VIDEO_RATING,
+                    xbmcplugin.SORT_METHOD_VIDEO_RUNTIME]
     return plugin.add_items(items, sort_method_ids=sort_methods)
 
 
