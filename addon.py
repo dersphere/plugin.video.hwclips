@@ -1,5 +1,5 @@
 from xbmcswift import Plugin, xbmc, xbmcplugin, xbmcgui
-import resources.lib.scraper as scraper
+import resources.lib.hwclips as hwclips
 import resources.lib.cache
 
 __ADDON_NAME__ = 'HWCLIPS.com'
@@ -18,7 +18,7 @@ OVERLAYS = {'none': xbmcgui.ICON_OVERLAY_NONE,
 
 class Plugin_adv(Plugin):
 
-    def add_items(self, iterable, sort_method_ids=[]):
+    def add_items(self, iterable, is_update=False, sort_method_ids=[]):
         items = []
         urls = []
         for i, li_info in enumerate(iterable):
@@ -31,7 +31,7 @@ class Plugin_adv(Plugin):
             xbmcplugin.addDirectoryItems(self.handle, items, len(items))
             for id in sort_method_ids:
                 xbmcplugin.addSortMethod(self.handle, id)
-            xbmcplugin.endOfDirectory(self.handle)
+            xbmcplugin.endOfDirectory(self.handle, updateListing=is_update)
         return urls
 
 
@@ -41,30 +41,27 @@ plugin = Plugin_adv(__ADDON_NAME__, __ADDON_ID__, __file__)
 @plugin.route('/', default=True)
 def show_root():
     log('show_root started')
-    language = __get_language()
-    type, data = scraper.get_list(pref_lang=language)
-    if type == scraper.API_RESPONSE_TYPE_FOLDERS:
+    type, data, num_pages = Api.get_list()
+    if type == hwclips.API_RESPONSE_TYPE_FOLDERS:
         return __add_folders(data)
     else:
         raise
 
 
-@plugin.route('/<path>/')
-def show_folder(path):
-    log('show_folder started with path: %s' % path)
+@plugin.route('/<path>/page/<page>')
+def show_folder(path, page):
+    log('show_folder started with path:%s page:%s' % (path, page))
     cache_path = xbmc.translatePath(plugin._plugin.getAddonInfo('profile'))
     Cache = resources.lib.cache.Cache(cache_path)
-    language = __get_language()
-    cache_id = path + language
-    cache_data = Cache.get(cache_id, max_age=3600)
+    cache_data = False #Cache.get(path, max_age=3600)
     if not cache_data:
-        cache_data = scraper.get_list(path, pref_lang=language)
-        Cache.set(cache_id, cache_data)
-    type, data = cache_data
-    if type == scraper.API_RESPONSE_TYPE_FOLDERS:
+        cache_data = Api.get_list(path, int(page))
+        Cache.set(path, cache_data)
+    type, data, num_pages = cache_data
+    if type == hwclips.API_RESPONSE_TYPE_FOLDERS:
         return __add_folders(data)
-    elif type == scraper.API_RESPONSE_TYPE_VIDEOS:
-        return __add_videos(data)
+    elif type == hwclips.API_RESPONSE_TYPE_VIDEOS:
+        return __add_videos(data, path, page, num_pages)
     else:
         raise
 
@@ -72,7 +69,7 @@ def show_folder(path):
 @plugin.route('/video/<id>/')
 def watch_video(id):
     log('watch_video started with id: %s' % id)
-    video = scraper.get_video(id)
+    video = Api.get_video(id)
     log('watch_video finished with video: %s' % video)
     return plugin.set_resolved_url(video['full_path'])
 
@@ -81,12 +78,13 @@ def __add_folders(entries):
     items = [{'label': __format_folder_title(e['name'], int(e['count'])),
               'thumbnail': e.get('image', 'DefaultFolder.png'),
               'info': {'plot': e['description']},
-              'url': plugin.url_for('show_folder', path=e['path']),
+              'url': plugin.url_for('show_folder', path=e['path'],
+                                                   page='1'),
              } for e in entries]
     return plugin.add_items(items)
 
 
-def __add_videos(entries):
+def __add_videos(entries, path, page, num_pages):
     items = [{'label': __format_video_title(e['name'], e['language']),
               'thumbnail': e.get('image', 'DefaultVideo.png'),
               'info': {'originaltitle': e['name'],
@@ -104,11 +102,29 @@ def __add_videos(entries):
               'is_folder': False,
               'is_playable': True,
              } for e in entries]
+
+    if int(page) < int(num_pages):
+        next_page = str(int(page) + 1)
+        items.insert(0, {'label': '>> %s %s >>' % ('Page',
+                                                   next_page),
+                         'url': plugin.url_for('show_folder',
+                                               path=path,
+                                               page=next_page)})
+    if int(page) > 1:
+        prev_page = str(int(page) - 1)
+        items.insert(0, {'label': '<< %s %s <<' % ('Page',
+                                                   prev_page),
+                         'url': plugin.url_for('show_folder',
+                                               path=path,
+                                               page=prev_page)})
+    is_update = (int(page) != 1)
+
     sort_methods = [xbmcplugin.SORT_METHOD_DATE,
                     xbmcplugin.SORT_METHOD_LABEL,
                     xbmcplugin.SORT_METHOD_VIDEO_RATING,
                     xbmcplugin.SORT_METHOD_VIDEO_RUNTIME]
-    return plugin.add_items(items, sort_method_ids=sort_methods)
+    return plugin.add_items(items, is_update=is_update,
+                            sort_method_ids=sort_methods)
 
 
 def __format_video_overlay(is_hd):
@@ -154,4 +170,6 @@ def log(msg):
 
 
 if __name__ == '__main__':
+    language = __get_language()
+    Api = hwclips.Api(language)
     plugin.run()

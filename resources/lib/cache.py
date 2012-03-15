@@ -4,6 +4,7 @@ import simplejson as json
 
 CACHE_VERSION = 1
 
+
 class Cache(object):
 
     def __init__(self, cache_path, cache_filename='cache.json'):
@@ -58,7 +59,6 @@ class Cache(object):
         self.__cache['content'][element_id] = {'timestamp': time.time(),
                                                'data': element_data}
         self.__write_cache()
-
 
 
 def log(msg):
