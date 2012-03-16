@@ -104,6 +104,7 @@ class Api(object):
                  'keywords': i['keyword'].split(),
                  'username': i['username'],
                  'date': self.__format_date(i['addtime']),
+                 'year': self.__format_year(i['addtime']),
                  'description': i.get('description', ''),
                  'gurl': i.get('gurl', ''),
                  'views': i.get('views', '0'),
@@ -119,6 +120,9 @@ class Api(object):
 
     def __format_date(self, timestamp):
         return datetime.fromtimestamp(int(timestamp)).strftime('%d.%m.%Y')
+
+    def __format_year(self, timestamp):
+        return int(datetime.fromtimestamp(int(timestamp)).strftime('%Y'))
 
     def __format_duration(self, duration):
         seconds = int(float(duration))

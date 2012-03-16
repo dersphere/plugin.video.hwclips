@@ -106,6 +106,7 @@ def __add_videos(entries, path, page, num_pages):
               'info': {'originaltitle': e['name'],
                        'studio': e['username'],
                        'date': e['date'],
+                       'year': e['year'],
                        'genre': ', '.join(e['keywords']),
                        'plot': e['description'],
                        'rating': float(e['rating']),
