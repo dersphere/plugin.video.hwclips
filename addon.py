@@ -1,4 +1,4 @@
-from xbmcswift import Plugin, xbmc, xbmcplugin, xbmcgui
+from xbmcswift import Plugin, xbmc, xbmcplugin, xbmcgui, clean_dict
 import resources.lib.hwclips as hwclips
 import resources.lib.cache
 
@@ -28,11 +28,26 @@ class Plugin_adv(Plugin):
                                             '', li_info.get('url'))
                 urls.append(li_info.get('url'))
         if self._mode is 'xbmc':
+            self.set_content('movies')
             xbmcplugin.addDirectoryItems(self.handle, items, len(items))
             for id in sort_method_ids:
                 xbmcplugin.addSortMethod(self.handle, id)
             xbmcplugin.endOfDirectory(self.handle, updateListing=is_update)
         return urls
+
+    def _make_listitem(self, label, label2='', iconImage='', thumbnail='',
+                       path='', **options):
+        li = xbmcgui.ListItem(label, label2=label2, iconImage=iconImage,
+                              thumbnailImage=thumbnail, path=path)
+        cleaned_info = clean_dict(options.get('info'))
+        if cleaned_info:
+            li.setInfo('video', cleaned_info)
+            li.setProperty('Fanart_Image', iconImage )
+        if options.get('is_playable'):
+            li.setProperty('IsPlayable', 'true')
+        if options.get('context_menu'):
+            li.addContextMenuItems(options['context_menu'])
+        return options['url'], li, options.get('is_folder', True)
 
 
 plugin = Plugin_adv(__ADDON_NAME__, __ADDON_ID__, __file__)
@@ -86,7 +101,7 @@ def __add_folders(entries):
 
 def __add_videos(entries, path, page, num_pages):
     items = [{'label': __format_video_title(e['name'], e['language']),
-              'thumbnail': e.get('image', 'DefaultVideo.png'),
+              'iconImage': e.get('image', 'DefaultVideo.png'),
               'info': {'originaltitle': e['name'],
                        'studio': e['username'],
                        'date': e['date'],
