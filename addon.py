@@ -68,10 +68,11 @@ def show_folder(path, page):
     log('show_folder started with path:%s page:%s' % (path, page))
     cache_path = xbmc.translatePath(plugin._plugin.getAddonInfo('profile'))
     Cache = resources.lib.cache.Cache(cache_path)
-    cache_data = False #Cache.get(path, max_age=3600)
+    cache_id = '|'.join((path, page,))
+    cache_data = Cache.get(cache_id, max_age=3600)
     if not cache_data:
         cache_data = Api.get_list(path, int(page))
-        Cache.set(path, cache_data)
+        Cache.set(cache_id, cache_data)
     type, data, num_pages = cache_data
     if type == hwclips.API_RESPONSE_TYPE_FOLDERS:
         return __add_folders(data)
