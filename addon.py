@@ -18,7 +18,8 @@ OVERLAYS = {'none': xbmcgui.ICON_OVERLAY_NONE,
 
 class Plugin_adv(Plugin):
 
-    def add_items(self, iterable, is_update=False, sort_method_ids=[]):
+    def add_items(self, iterable, is_update=False, sort_method_ids=[],
+                  override_view_mode=False):
         items = []
         urls = []
         for i, li_info in enumerate(iterable):
@@ -32,6 +33,9 @@ class Plugin_adv(Plugin):
             xbmcplugin.addDirectoryItems(self.handle, items, len(items))
             for id in sort_method_ids:
                 xbmcplugin.addSortMethod(self.handle, id)
+            if override_view_mode:
+                if xbmc.getSkinDir() == 'skin.confluence':
+                    xbmc.executebuiltin('Container.SetViewMode(504)')
             xbmcplugin.endOfDirectory(self.handle, updateListing=is_update)
         return urls
 
@@ -137,8 +141,10 @@ def __add_videos(entries, path, page, num_pages):
                     xbmcplugin.SORT_METHOD_LABEL,
                     xbmcplugin.SORT_METHOD_VIDEO_RATING,
                     xbmcplugin.SORT_METHOD_VIDEO_RUNTIME]
+    override_view_mode = plugin.get_setting('override_view_mode') == 'true'
     return plugin.add_items(items, is_update=is_update,
-                            sort_method_ids=sort_methods)
+                            sort_method_ids=sort_methods,
+                            override_view_mode=override_view_mode)
 
 
 def __format_video_overlay(is_hd):
