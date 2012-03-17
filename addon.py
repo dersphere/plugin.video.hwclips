@@ -42,7 +42,7 @@ class Plugin_adv(Plugin):
         cleaned_info = clean_dict(options.get('info'))
         if cleaned_info:
             li.setInfo('video', cleaned_info)
-            li.setProperty('Fanart_Image', iconImage )
+            li.setProperty('Fanart_Image', iconImage)
         if options.get('is_playable'):
             li.setProperty('IsPlayable', 'true')
         if options.get('context_menu'):
@@ -60,7 +60,7 @@ def show_root():
     if type == hwclips.API_RESPONSE_TYPE_FOLDERS:
         return __add_folders(data)
     else:
-        raise
+        raise Exception('Unexpected return type from api')
 
 
 @plugin.route('/<path>/page/<page>')
@@ -78,7 +78,7 @@ def show_folder(path, page):
     elif type == hwclips.API_RESPONSE_TYPE_VIDEOS:
         return __add_videos(data, path, page, num_pages)
     else:
-        raise
+        raise Exception('Unexpected return type from api')
 
 
 @plugin.route('/video/<id>/')
@@ -177,8 +177,8 @@ def __get_language():
     else:
         lang = 'en'
     return lang
-    
-    
+
+
 def __get_cache():
     profile_path = plugin._plugin.getAddonInfo('profile').decode('utf-8')
     cache_path = xbmc.translatePath(profile_path)

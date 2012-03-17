@@ -38,7 +38,7 @@ class Api(object):
         elif type == API_RESPONSE_TYPE_VIDEOS:
             entries = self.__format_videos(data)
         else:
-            raise
+            raise Exception('Unexpected return type from api')
         log('get_list finished with %d entries' % len(entries))
         num_pages = num_entries / self.per_page + 1
         return type, entries, num_pages
@@ -50,9 +50,9 @@ class Api(object):
         if type == API_RESPONSE_TYPE_VIDEO:
             entry = self.__format_video(data)
         elif type == API_RESPONSE_TYPE_ERROR:
-            raise
+            raise Exception('api returned error type')
         else:
-            raise
+            raise Exception('Unexpected return type from api')
         log('get_list finished')
         return entry
 
@@ -74,7 +74,7 @@ class Api(object):
         elif API_RESPONSE_TYPE_VIDEO in json.keys():
             type = API_RESPONSE_TYPE_VIDEO
         else:
-            raise
+            raise Exception('Unexpected return type from api')
         data = json[type]
         if DEBUG:
             log('DEBUG: type: %s' % type)
