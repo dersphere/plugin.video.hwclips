@@ -52,6 +52,7 @@ class Cache(object):
             if max_age and time.time() - element['timestamp'] > max_age:
                 log('Cache.get element too old')
             else:
+                log('Cache.get successful')
                 return element['data']
 
     def set(self, element_id, element_data):
