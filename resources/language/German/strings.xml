@@ -10,6 +10,9 @@
     <string id="30011">Beliebtesten</string>
     <string id="30012">Meistgesehenen</string>
 
+    <!-- General Strings -->
+    <string id="30020">Seite</string>
+
     <!-- Settings -->
     <string id="30200">Anzahl Videos in Verzeichnissnamen zeigen</string>
     <string id="30201">Video Sprache in Videotiteln zeigen</string>

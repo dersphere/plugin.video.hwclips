@@ -118,23 +118,21 @@ def __add_videos(entries, path, page, num_pages):
               'is_folder': False,
               'is_playable': True,
              } for e in entries]
-
     if int(page) < int(num_pages):
         next_page = str(int(page) + 1)
-        items.insert(0, {'label': '>> %s %s >>' % ('Page',
+        items.insert(0, {'label': '>> %s %s >>' % (plugin.get_string(30020),
                                                    next_page),
                          'url': plugin.url_for('show_folder',
                                                path=path,
                                                page=next_page)})
     if int(page) > 1:
         prev_page = str(int(page) - 1)
-        items.insert(0, {'label': '<< %s %s <<' % ('Page',
+        items.insert(0, {'label': '<< %s %s <<' % (plugin.get_string(30020),
                                                    prev_page),
                          'url': plugin.url_for('show_folder',
                                                path=path,
                                                page=prev_page)})
     is_update = (int(page) != 1)
-
     sort_methods = [xbmcplugin.SORT_METHOD_DATE,
                     xbmcplugin.SORT_METHOD_LABEL,
                     xbmcplugin.SORT_METHOD_VIDEO_RATING,
