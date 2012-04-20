@@ -67,7 +67,7 @@ def show_root():
         raise Exception('Unexpected return type from api')
 
 
-@plugin.route('/<path>/page/<page>')
+@plugin.route('/<path>/page/<page>/')
 def show_folder(path, page):
     log('show_folder started with path:%s page:%s' % (path, page))
     Cache = __get_cache()
